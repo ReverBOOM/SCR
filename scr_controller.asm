@@ -221,42 +221,48 @@ wait_adc:
 ;==============================================================================
 map_delay:
     ; Map analog value (0-1023) to delay time (0-9ms max)
-    ; Total sequence must not exceed 10ms: delay + 1ms pulse <= 10ms
-    ; So maximum delay = 9ms = 18000 Timer1 ticks (with 1:1 prescaler)
+    ; Use simpler approach: multiply by smaller factor to prevent early saturation
+    ; Target: smooth linear mapping across full voltage range
+    ; Use only the low 8 bits for smoother control
     
-    ; Multiply analog_value by 18 (approximately 18000/1023)
-    movlw   18
-    mulwf   analog_value_L      ; Low byte * 18
+    ; Use analog_value_L (0-255) and multiply by a reasonable factor
+    ; 255 * 70 = 17850 (close to 18000 max)
+    ; This gives smooth progression without early saturation
+    
+    movlw   70                  ; Scaling factor
+    mulwf   analog_value_L      ; Multiply low byte only
+    
+    ; Store result
     movf    PRODL, W
     movwf   delay_time_L
     movf    PRODH, W
     movwf   delay_time_H
     
-    ; Add contribution from high byte
-    movlw   18
-    mulwf   analog_value_H      ; High byte * 18
-    movf    PRODL, W
-    addwf   delay_time_H, F     ; Add to high byte
-    
-    ; Ensure delay doesn't exceed 18000 ticks (9ms)
-    ; Check if delay_time > 18000
+    ; Check if we exceeded 18000 (0x4650)
     movf    delay_time_H, W
-    sublw   HIGH(18000)
+    sublw   0x46                ; Compare with high byte of 18000
     btfss   STATUS, C
-    goto    limit_delay         ; If carry clear, limit delay
+    goto    limit_delay         ; If carry clear, we exceeded limit
     
+    ; If high bytes are equal, check low byte
+    movf    delay_time_H, W
+    sublw   0x46
+    btfss   STATUS, Z
+    return                      ; If not equal, we're within limits
+    
+    ; High bytes equal, check low byte
     movf    delay_time_L, W
-    sublw   LOW(18000)
+    sublw   0x50                ; Compare with low byte of 18000
     btfss   STATUS, C
-    goto    limit_delay         ; If carry clear, limit delay
+    goto    limit_delay         ; If carry clear, we exceeded limit
     
-    return                      ; Delay is within limits
+    return                      ; Within limits
     
 limit_delay:
     ; Limit delay to 18000 ticks (9ms)
-    movlw   LOW(18000)
+    movlw   0x50                ; Low byte of 18000
     movwf   delay_time_L
-    movlw   HIGH(18000)
+    movlw   0x46                ; High byte of 18000
     movwf   delay_time_H
     
     return
