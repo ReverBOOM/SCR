@@ -166,57 +166,8 @@ void __interrupt() ISR(void) {
         PORTDbits.RD4 = !PORTDbits.RD4;  // Toggle RD4 again
         INTCON3bits.INT2IF = 0;     // Clear INT2 interrupt flag
     }
-        // INT0 interrupt handling code
-        RD0 = !RD1;  // Example: toggle LED on RD0
-        delay_ms(1); // Debounce delay
-        RD0 = !RD1;  // Toggle RD1 state
-        toggleR = !toggleR; // Toggle R state
-        delay_ms(19); // Additional debounce delay
-        INTCONbits.INT0IF = 0;  // Clear INT0 interrupt flag
-    }
-    
-
-    // Handle INT1 (RB1) interrupt - Rising edge
-    if (INTCON3bits.INT1IF == 1 && toggleS == 0) {
-        // INT1 interrupt handling code
-        RD2 = !RD2;  // Example: toggle LED on RD2
-        delay_ms(1); // Debounce delay
-        RD2 = !RD2;  // Toggle RD2 state
-        toggleS = !toggleS; // Toggle S state
-        delay_ms(19); // Additional debounce delay
-        INTCON3bits.INT1IF = 0;  // Clear INT1 interrupt flag
-    }
-    if (INTCON3bits.INT1IF == 1 && toggleS == 1) {
-        // INT1 interrupt handling code
-        RD2 = !RD3;  // Example: toggle LED on RD2
-        delay_ms(1); // Debounce delay
-        RD2 = !RD3;  // Toggle RD3 state
-        toggleS = !toggleS; // Toggle S state
-        delay_ms(19); // Additional debounce delay
-        INTCON3bits.INT1IF = 0;  // Clear INT1 interrupt flag
-    }
-
-    
-    // Handle INT2 (RB2) interrupt - Falling edge
-    if (INTCON3bits.INT2IF == 1 && toggleT == 0) {
-        // INT2 interrupt handling code
-        RD4 = !RD4;  // Example: toggle LED on RD4
-        delay_ms(1); // Debounce delay
-        RD4 = !RD4;  // Toggle RD4 state
-        toggleT = !toggleT; // Toggle T state
-        delay_ms(19); // Additional debounce delay
-        INTCON3bits.INT2IF = 0;  // Clear INT2 interrupt flag
-    }
-    if (INTCON3bits.INT2IF == 1 && toggleT == 1) {
-        // INT2 interrupt handling code
-        RD4 = !RD5;  // Example: toggle LED on RD4
-        delay_ms(1); // Debounce delay
-        RD4 = !RD5;  // Toggle RD5 state
-        toggleT = !toggleT; // Toggle T state
-        delay_ms(19); // Additional debounce delay
-        INTCON3bits.INT2IF = 0;  // Clear INT2 interrupt flag
-    }
 }
+
 
 //==============================================================================
 // Initialize system
